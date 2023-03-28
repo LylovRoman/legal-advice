@@ -19,12 +19,12 @@ class CheckRole
     public function handle(Request $request, Closure $next, $role)
     {
         if (Auth::user()->role != $role) {
-            return response()->json([
+            throw new HttpResponseException(response()->json([
                 "error" => [
                     "code" => 403,
-                    "message" => "Not enough rights"
+                    "message" => "The action is not available to your role"
                 ]
-            ], 403);
+            ], 403));
         }
         return $next($request);
     }

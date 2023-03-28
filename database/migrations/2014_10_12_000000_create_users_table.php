@@ -17,9 +17,9 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('name');
             $table->enum('role', ['client', 'lawyer']);
-            $table->string('email')->unique();
+            $table->string('login')->unique();
             $table->string('password');
-            $table->string('api_token');
+            $table->string('api_token')->nullable();
             $table->timestamps();
         });
     }

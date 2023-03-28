@@ -19,6 +19,8 @@ class CreateIssuesTable extends Migration
             $table->string('image_path');
             $table->text('content');
             $table->enum('status', ['new', 'in progress', 'completed']);
+            $table->foreignId('client_id')->constrained('users');
+            $table->foreignId('lawyer_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }
