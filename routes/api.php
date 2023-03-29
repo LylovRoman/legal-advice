@@ -19,13 +19,11 @@ Route::post('/auth', [\App\Http\Controllers\AuthController::class, 'login']);
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
     Route::middleware('role:lawyer')->group(function () {
-        Route::get('/test', function (Request $request) {
-            return response()->json([
-                "data" => "success"
-            ]);
-        });
+        Route::patch('/issue/response/{id}', [\App\Http\Controllers\IssueController::class, 'response']);
     });
     Route::middleware('role:client')->group(function () {
-
+        Route::post('/issue/question', [\App\Http\Controllers\IssueController::class, 'question']);
+        Route::patch('/issue/comment/{id}', [\App\Http\Controllers\IssueController::class, 'comment']);
     });
+    Route::get('/issues', [\App\Http\Controllers\IssueController::class, 'index']);
 });

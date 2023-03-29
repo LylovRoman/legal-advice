@@ -16,8 +16,10 @@ class CreateIssuesTable extends Migration
         Schema::create('issues', function (Blueprint $table) {
             $table->id();
             $table->enum('category', ['land disputes', 'family disputes', 'labor disputes', 'disputes with the traffic police']);
-            $table->string('image_path');
-            $table->text('content');
+            $table->string('image_path')->nullable();
+            $table->text('question');
+            $table->text('response')->nullable();
+            $table->text('comment')->nullable();
             $table->enum('status', ['new', 'in progress', 'completed']);
             $table->foreignId('client_id')->constrained('users');
             $table->foreignId('lawyer_id')->nullable()->constrained('users');
