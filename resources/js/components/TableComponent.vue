@@ -4,16 +4,50 @@
             <thead>
             <tr>
                 <th v-for="column in columns" :key="column.id">{{ column.label }}</th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(row, index) in rows" :key="row.id">
-                <td v-for="(cell, cellIndex) in row.cells" :key="cellIndex">{{ cell }}</td>
-                <td><button @click="deleteRow(index)">Удалить</button></td>
+            <tr v-for="issue in issues" :key="issue.id">
+                <td>{{ issue.category }}</td>
+                <td>{{ issue.client.name }}</td>
+                <td><a :href="'/issue/' + issue.id">{{ issue.question }}</a></td>
+                <td>{{ (issue.lawyer != '---') ? issue.lawyer.name : '---' }}</td>
+                <td>{{ issue.status }}</td>
+                <td>{{ issue.created_at }}</td>
             </tr>
             </tbody>
         </table>
+        <div v-if="role != 'lawyer'">
+            <input @click="onlyMyShow" v-model="onlyMy" type="checkbox"> Показывать только мои заявки
+            <div style="display: flex; flex-direction: column;">
+                <textarea v-model="question" class="w-25" style="min-height: 200px"></textarea>
+                <input type="file">
+                <select v-model="category">
+                    <option value="land disputes">land disputes</option>
+                    <option value="family disputes">family disputes</option>
+                    <option value="labor disputes">labor disputes</option>
+                    <option value="disputes with the traffic police">disputes with the traffic police</option>
+                </select>
+                <input type="submit" @click.prevent="createIssue" class="w-25">
+            </div>
+        </div>
+        <div v-if="role == 'lawyer'" style="display: flex" class="gap-5">
+            <div>
+                <h4>Фильтровать по статусу</h4>
+                <select v-model="status" @change="onlyStatusShow">
+                    <option value="">Сбросить</option>
+                    <option value="new">Новые</option>
+                    <option value="in progress">В работе</option>
+                    <option value="completed">Завершенные</option>
+                </select>
+            </div>
+            <div>
+                <h4>Фильтровать по дате</h4>
+                <input v-model="from" type="date">
+                <input v-model="to" type="date">
+                <input @click.prevent="onlyDateBetween" type="submit">
+            </div>
+        </div>
     </div>
 </template>
 
@@ -21,31 +55,77 @@
 export default {
     name: "Table",
     methods: {
-        deleteRow(index) {
-            this.rows.splice(index, 1);
+        getIssues() {
+            axios.get('/api/issues' + location.search, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
+                }
+            })
+            .then(data => {
+                this.issues = data.data.data.issues;
+            })
         },
-        getUsers() {
-            axios.get('/users')
+        getRole() {
+            axios.get('/api/role', {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
+                }
+            })
                 .then(data => {
-                    console.log(data.data);
+                    this.role = data.data.data.role;
                 })
+        },
+        onlyMyShow() {
+            if (this.onlyMy) {
+                window.location.href = '/'
+            } else {
+                window.location.href = '/?onlyMy=yes'
+            }
+        },
+        onlyStatusShow() {
+            if (this.status) {
+                window.location.href = '/?status=' + this.status;
+            } else {
+                window.location.href = '/';
+            }
+        },
+        onlyDateBetween() {
+            if (this.from && this.to) {
+                window.location.href = '/?from=' + this.from + '&to=' + this.to;
+            } else {
+                window.location.href = '/';
+            }
+        }
+    },
+    computed: {
+        onlyMy()
+        {
+            return location.search.split('onlyMy?=yes')[0] == '?onlyMy=yes';
         }
     },
     data(){
         return {
+            issues: [],
+            role: undefined,
             columns: [
-                { id: 1, label: "Имя" },
-                { id: 2, label: "Возраст" },
-                { id: 3, label: "Email" }
+                { id: 1, label: "Категория" },
+                { id: 2, label: "Клиент" },
+                { id: 3, label: "Вопрос" },
+                { id: 4, label: "Юрист" },
+                { id: 5, label: "Статус" },
+                { id: 6, label: "Дата" }
             ],
-            rows: [
-                { id: 1, cells: ["John Smith", 25, "john.smith@email.com"] },
-                { id: 2, cells: ["Jane Doe", 30, "jane.doe@email.com"] }
-            ]
+            status: null,
+            from: null,
+            to: null,
+            question: null,
+            image: null,
+            category: null
         }
     },
     mounted() {
-        this.getUsers();
+        this.getRole();
+        this.getIssues();
     }
 };
 </script>

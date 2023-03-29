@@ -12,7 +12,7 @@ class AuthController extends Controller
     public function login(AuthLoginRequest $request)
     {
         if (!Auth::check()){
-            if (($user = User::where('login', $request->login)->first()) && ($user->password === $request->password)){
+            if (($user = User::where('email', $request->email)->first()) && ($user->password === $request->password)){
                 return response()->json([
                     "data" => [
                         "user_token" => $user->generateToken()
@@ -34,6 +34,15 @@ class AuthController extends Controller
         return response()->json([
             "data" => [
                 "message" => "logout"
+            ]
+        ]);
+    }
+
+    public function role()
+    {
+        return response()->json([
+            "data" => [
+                "role" => Auth::user()->role
             ]
         ]);
     }

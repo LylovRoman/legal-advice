@@ -79,7 +79,26 @@ class IssueController extends Controller
             ]
         ], 404));
     }
-
+    public function show($issue) {
+        $issue = Issue::query()->find($issue);
+        $issue->client = $issue->client;
+        if (isset($issue->lawyer_id)){
+            $issue->lawyer = $issue->lawyer;
+        } else {
+            $issue->lawyer = '---';
+        }
+        if ($issue) {
+            return response()->json([
+                "data" => $issue
+            ]);
+        }
+        throw new HttpResponseException(response()->json([
+            "error" => [
+                "code" => 404,
+                "message" => "Issue not found"
+            ]
+        ], 404));
+    }
     public function index()
     {
         $filter = $_GET['filter'] ?? false;
@@ -105,7 +124,15 @@ class IssueController extends Controller
                     $clientsBeen[] = $issue->client_id;
                 }
             }
-            $issues = $issues->sortByDesc('created_at', SORT_NATURAL);
+            foreach ($issues as $key => $issue) {
+                $issue->client = $issue->client;
+                if (isset($issue->lawyer_id)){
+                    $issue->lawyer = $issue->lawyer;
+                } else {
+                    $issue->lawyer = '---';
+                }
+                $issues[$key] = $issue;
+            }
         } else {
             $otherIssues = Issue::query()->where('status', 'new');
             $issues = Issue::query()
@@ -122,6 +149,17 @@ class IssueController extends Controller
             $otherIssues = $otherIssues->orderByDesc('created_at')->get();
             $issues = $issues->merge($otherIssues);
         }
+        $issues = $issues->sortByDesc('created_at', SORT_NATURAL);
+        foreach ($issues as $key => $issue) {
+            $issue->client = $issue->client;
+            if (isset($issue->lawyer_id)){
+                $issue->lawyer = $issue->lawyer;
+            } else {
+                $issue->lawyer = '---';
+            }
+            $issues[$key] = $issue;
+        }
+        $issues = array_values($issues->toArray());
         return response()->json([
         "data" => [
             "issues" => $issues
