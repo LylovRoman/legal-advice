@@ -18,7 +18,7 @@ class IssueController extends Controller
         $imagePath = null;
         if ($request->image) {
             $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
+            $request->image->move(public_path('ш'), $imageName);
             $imagePath = '/images/' . $imageName;
         }
         $issue = Issue::query()->create([

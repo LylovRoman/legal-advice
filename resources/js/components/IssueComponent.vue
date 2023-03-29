@@ -7,9 +7,22 @@
             <p>Дата: {{issue.created_at}}</p>
             <img :src="issue.image_path">
         </div>
+        <div v-if="issue.status != 'new'">
+            <h2>{{ issue.response }}</h2>
+            <p>Юрист: {{issue.lawyer.name}}</p>
+        </div>
+        <div v-if="issue.status == 'completed'">
+            <h2>{{ issue.comment }}</h2>
+            <p>Клиент: {{issue.client.name}}</p>
+            <p>Дата: {{issue.updated_at}}</p>
+        </div>
         <div v-if="(issue.status == 'new') && (role == 'lawyer')" style="display: flex; flex-direction: column;">
             <textarea v-model="textarea" class="w-25" style="min-height: 200px"></textarea>
             <input type="submit" @click.prevent="sendResponse" class="w-25">
+        </div>
+        <div v-if="(issue.status == 'in progress') && (role == 'client')" style="display: flex; flex-direction: column;">
+            <textarea v-model="comment" class="w-25" style="min-height: 200px"></textarea>
+            <input type="submit" @click.prevent="sendComment" class="w-25" value="Проблема решена">
         </div>
     </div>
 </template>
@@ -19,6 +32,9 @@ export default {
     name: "Issue",
     methods: {
         getRole() {
+            if (!localStorage.getItem('user_token')){
+                window.location.href = '/auth';
+            }
             axios.get('/api/role', {
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('user_token')
@@ -26,7 +42,6 @@ export default {
             })
                 .then(data => {
                     this.role = data.data.data.role;
-                    console.log(document.location.pathname.split('/')[2]);
                 })
         },
         getIssue() {
@@ -37,7 +52,6 @@ export default {
             })
                 .then(data => {
                     this.issue = data.data.data;
-                    console.log(this.issue);
                 })
         },
         sendResponse() {
@@ -54,12 +68,27 @@ export default {
                     window.location.href = '/';
                 })
         },
+        sendComment() {
+            axios('/api/issue/comment/' + document.location.pathname.split('/')[2], {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
+                },
+                data: {
+                    comment: this.comment
+                }
+            })
+                .then(data => {
+                    window.location.href = '/';
+                })
+        }
     },
     data(){
         return {
             issue: {},
             role: undefined,
-            textarea: null
+            textarea: null,
+            comment: null
         }
     },
     mounted() {

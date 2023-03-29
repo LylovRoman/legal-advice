@@ -21,14 +21,14 @@
             <input @click="onlyMyShow" v-model="onlyMy" type="checkbox"> Показывать только мои заявки
             <div style="display: flex; flex-direction: column;">
                 <textarea v-model="question" class="w-25" style="min-height: 200px"></textarea>
-                <input type="file">
-                <select v-model="category">
+                <input type="file" @change="uploadImage">
+                <select v-model="category" class="w-25">
                     <option value="land disputes">land disputes</option>
                     <option value="family disputes">family disputes</option>
                     <option value="labor disputes">labor disputes</option>
                     <option value="disputes with the traffic police">disputes with the traffic police</option>
                 </select>
-                <input type="submit" @click.prevent="createIssue" class="w-25">
+                <input type="submit" @click.prevent="sendQuestion" class="w-25">
             </div>
         </div>
         <div v-if="role == 'lawyer'" style="display: flex" class="gap-5">
@@ -55,6 +55,22 @@
 export default {
     name: "Table",
     methods: {
+        sendQuestion() {
+            axios('/api/issue/question', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
+                },
+                data: {
+                    category: this.category,
+                    question: this.question,
+                    image: this.image
+                }
+            })
+                .then(data => {
+                    window.location.href = '/';
+                })
+        },
         getIssues() {
             axios.get('/api/issues' + location.search, {
                 headers: {
@@ -66,6 +82,9 @@ export default {
             })
         },
         getRole() {
+            if (!localStorage.getItem('user_token')){
+                window.location.href = '/auth';
+            }
             axios.get('/api/role', {
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('user_token')
@@ -95,6 +114,9 @@ export default {
             } else {
                 window.location.href = '/';
             }
+        },
+        uploadImage() {
+            this.image = event.target.files[0];
         }
     },
     computed: {
