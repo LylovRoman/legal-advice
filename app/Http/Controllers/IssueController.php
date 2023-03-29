@@ -89,7 +89,38 @@ class IssueController extends Controller
         $maxPage = ceil(Issue::all()->count() / $limit);
 
         if (Auth::user()->role == 'client') {
-            $issues = Issue::query()->orderBy('created_at')->get();
+            $issues = Issue::query()
+                ->where('client_id', Auth::id())
+                ->get();
+            if (!isset($_GET['onlyMy'])) {
+                $otherIssues = Issue::query()
+                    ->where('client_id', '!=', Auth::id())
+                    ->get()
+                    ->shuffle();
+                $clientsBeen = [];
+                foreach ($otherIssues as $issue) {
+                    if (!in_array($issue->client_id, $clientsBeen)) {
+                        $issues->push($issue);
+                    }
+                    $clientsBeen[] = $issue->client_id;
+                }
+            }
+            $issues = $issues->sortByDesc('created_at', SORT_NATURAL);
+        } else {
+            $otherIssues = Issue::query()->where('status', 'new');
+            $issues = Issue::query()
+                ->where('lawyer_id', Auth::id());
+            if (isset($_GET['status'])) {
+                $issues = $issues->where('status', $_GET['status']);
+                $otherIssues = $otherIssues->where('status', $_GET['status']);
+            }
+            if (isset($_GET['from']) && isset($_GET['to'])) {
+                $issues = $issues->whereBetween('created_at', [$_GET['from'], $_GET['to']]);
+                $otherIssues = $otherIssues->whereBetween('created_at', [$_GET['from'], $_GET['to']]);
+            }
+            $issues = $issues->orderByDesc('created_at')->get();
+            $otherIssues = $otherIssues->orderByDesc('created_at')->get();
+            $issues = $issues->merge($otherIssues);
         }
         return response()->json([
         "data" => [
