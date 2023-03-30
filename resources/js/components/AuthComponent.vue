@@ -8,7 +8,6 @@
         </div>
     </div>
 </template>
-
 <script>
 export default {
     name: "Auth",
@@ -27,7 +26,7 @@ export default {
     data(){
         return {
             email: null,
-            password: null
+            password: undefined
         }
     }
 };
