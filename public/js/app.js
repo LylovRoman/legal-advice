@@ -5374,19 +5374,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Issue",
   methods: {
     getRole: function getRole() {
       var _this = this;
+      if (!localStorage.getItem('user_token')) {
+        window.location.href = '/auth';
+      }
       axios.get('/api/role', {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('user_token')
         }
       }).then(function (data) {
         _this.role = data.data.data.role;
-        console.log(document.location.pathname.split('/')[2]);
       });
     },
     getIssue: function getIssue() {
@@ -5397,7 +5412,6 @@ __webpack_require__.r(__webpack_exports__);
         }
       }).then(function (data) {
         _this2.issue = data.data.data;
-        console.log(_this2.issue);
       });
     },
     sendResponse: function sendResponse() {
@@ -5412,13 +5426,25 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (data) {
         window.location.href = '/';
       });
+    },
+    sendComment: function sendComment() {
+      axios.patch("/api/issue/comment/".concat(document.location.pathname.split('/')[2]), {
+        comment: this.comment
+      }, {
+        headers: {
+          'Authorization': "Bearer ".concat(localStorage.getItem('user_token'))
+        }
+      }).then(function () {
+        window.location.href = '/';
+      });
     }
   },
   data: function data() {
     return {
       issue: {},
       role: undefined,
-      textarea: null
+      textarea: null,
+      comment: null
     };
   },
   mounted: function mounted() {
@@ -5497,6 +5523,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Table",
   methods: {
+    sendQuestion: function sendQuestion() {
+      axios('/api/issue/question', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('user_token')
+        },
+        data: {
+          category: this.category,
+          question: this.question,
+          image: this.image
+        }
+      }).then(function (data) {
+        window.location.href = '/';
+      });
+    },
     getIssues: function getIssues() {
       var _this = this;
       axios.get('/api/issues' + location.search, {
@@ -5509,6 +5550,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     getRole: function getRole() {
       var _this2 = this;
+      if (!localStorage.getItem('user_token')) {
+        window.location.href = '/auth';
+      }
       axios.get('/api/role', {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('user_token')
@@ -5537,6 +5581,9 @@ __webpack_require__.r(__webpack_exports__);
       } else {
         window.location.href = '/';
       }
+    },
+    uploadImage: function uploadImage() {
+      this.image = event.target.files[0];
     }
   },
   computed: {
@@ -10897,7 +10944,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.table-container {\n    overflow-x: auto; /* Enable horizontal scrolling */\n}\ntable {\n    border-collapse: collapse;\n    width: 100%;\n}\nth,\ntd {\n    padding: 8px;\n    text-align: left;\n    border-bottom: 1px solid #ddd;\n}\nth {\n    background-color: #f2f2f2;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.table-container {\r\n    overflow-x: auto; /* Enable horizontal scrolling */\n}\ntable {\r\n    border-collapse: collapse;\r\n    width: 100%;\n}\nth,\r\ntd {\r\n    padding: 8px;\r\n    text-align: left;\r\n    border-bottom: 1px solid #ddd;\n}\nth {\r\n    background-color: #f2f2f2;\n}\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -10945,7 +10992,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.table-container {\n    overflow-x: auto; /* Enable horizontal scrolling */\n}\ntable {\n    border-collapse: collapse;\n    width: 100%;\n}\nth,\ntd {\n    padding: 8px;\n    text-align: left;\n    border-bottom: 1px solid #ddd;\n}\nth {\n    background-color: #f2f2f2;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.table-container {\r\n    overflow-x: auto; /* Enable horizontal scrolling */\n}\ntable {\r\n    border-collapse: collapse;\r\n    width: 100%;\n}\nth,\r\ntd {\r\n    padding: 8px;\r\n    text-align: left;\r\n    border-bottom: 1px solid #ddd;\n}\nth {\r\n    background-color: #f2f2f2;\n}\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -29198,6 +29245,24 @@ var render = function () {
       _c("img", { attrs: { src: _vm.issue.image_path } }),
     ]),
     _vm._v(" "),
+    _vm.issue.status != "new"
+      ? _c("div", [
+          _c("h2", [_vm._v(_vm._s(_vm.issue.response))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("Юрист: " + _vm._s(_vm.issue.lawyer.name))]),
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.issue.status == "completed"
+      ? _c("div", [
+          _c("h2", [_vm._v(_vm._s(_vm.issue.comment))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("Клиент: " + _vm._s(_vm.issue.client.name))]),
+          _vm._v(" "),
+          _c("p", [_vm._v("Дата: " + _vm._s(_vm.issue.updated_at))]),
+        ])
+      : _vm._e(),
+    _vm._v(" "),
     _vm.issue.status == "new" && _vm.role == "lawyer"
       ? _c(
           "div",
@@ -29232,6 +29297,47 @@ var render = function () {
                 click: function ($event) {
                   $event.preventDefault()
                   return _vm.sendResponse.apply(null, arguments)
+                },
+              },
+            }),
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.issue.status == "in progress" && _vm.role == "client"
+      ? _c(
+          "div",
+          { staticStyle: { display: "flex", "flex-direction": "column" } },
+          [
+            _c("textarea", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.comment,
+                  expression: "comment",
+                },
+              ],
+              staticClass: "w-25",
+              staticStyle: { "min-height": "200px" },
+              domProps: { value: _vm.comment },
+              on: {
+                input: function ($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.comment = $event.target.value
+                },
+              },
+            }),
+            _vm._v(" "),
+            _c("input", {
+              staticClass: "w-25",
+              attrs: { type: "submit", value: "Проблема решена" },
+              on: {
+                click: function ($event) {
+                  $event.preventDefault()
+                  return _vm.sendComment.apply(null, arguments)
                 },
               },
             }),
@@ -29369,7 +29475,10 @@ var render = function () {
                 },
               }),
               _vm._v(" "),
-              _c("input", { attrs: { type: "file" } }),
+              _c("input", {
+                attrs: { type: "file" },
+                on: { change: _vm.uploadImage },
+              }),
               _vm._v(" "),
               _c(
                 "select",
@@ -29382,6 +29491,7 @@ var render = function () {
                       expression: "category",
                     },
                   ],
+                  staticClass: "w-25",
                   on: {
                     change: function ($event) {
                       var $$selectedVal = Array.prototype.filter
@@ -29425,7 +29535,7 @@ var render = function () {
                 on: {
                   click: function ($event) {
                     $event.preventDefault()
-                    return _vm.createIssue.apply(null, arguments)
+                    return _vm.sendQuestion.apply(null, arguments)
                   },
                 },
               }),
