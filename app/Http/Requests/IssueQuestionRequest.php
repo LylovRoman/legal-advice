@@ -30,7 +30,7 @@ class IssueQuestionRequest extends FormRequest
         return [
             'category' => 'string|required',
             'question' => 'string|required',
-            /*'image' => 'image|mimes:jpeg,png,jpg,gif,svg'*/
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg'
         ];
     }
 }
