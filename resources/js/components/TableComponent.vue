@@ -56,20 +56,18 @@ export default {
     name: "Table",
     methods: {
         sendQuestion() {
-            axios('/api/issue/question', {
-                method: 'POST',
+            const form = new FormData();
+            form.set('category', this.category);
+            form.set('question', this.question);
+            form.set('image', this.image);
+            axios.post('/api/issue/question', form, {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
-                },
-                data: {
-                    category: this.category,
-                    question: this.question,
-                    image: this.image
+                    'Authorization': 'Bearer ' + localStorage.getItem('user_token'),
+                    'Content-Type': 'form/data',
                 }
-            })
-                .then(data => {
-                    window.location.href = '/';
-                })
+            }).then(response => {
+                window.location.href = '/';
+            });
         },
         getIssues() {
             axios.get('/api/issues' + location.search, {
