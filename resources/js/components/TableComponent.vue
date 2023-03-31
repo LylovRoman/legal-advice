@@ -13,7 +13,7 @@
                 <td><a :href="'/issue/' + issue.id">{{ issue.question }}</a></td>
                 <td>{{ (issue.lawyer != '---') ? issue.lawyer.name : '---' }}</td>
                 <td>{{ issue.status }}</td>
-                <td>{{ issue.created_at }}</td>
+                <td>{{ issue.created_at | date }}</td>
             </tr>
             </tbody>
         </table>
@@ -117,6 +117,12 @@ export default {
         },
         uploadImage() {
             this.image = event.target.files[0];
+        }
+    },
+    filters: {
+        date: function (value) {
+            value = value.toString()
+            return value.substr(0, 10);
         }
     },
     computed: {

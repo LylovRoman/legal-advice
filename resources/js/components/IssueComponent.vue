@@ -69,18 +69,15 @@ export default {
                 })
         },
         sendComment() {
-            axios('/api/issue/comment/' + document.location.pathname.split('/')[2], {
-                method: 'PATCH',
+            axios.patch(`/api/issue/comment/${document.location.pathname.split('/')[2]}`, {
+                comment: this.comment
+            }, {
                 headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
-                },
-                data: {
-                    comment: this.comment
+                    'Authorization': `Bearer ${localStorage.getItem('user_token')}`
                 }
-            })
-                .then(data => {
+            }).then(() => {
                     window.location.href = '/';
-                })
+            });
         }
     },
     data(){
