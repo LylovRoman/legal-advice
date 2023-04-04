@@ -15,11 +15,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('issues');
-});
-Route::get('/issue/{id}', function () {
-    return view('issue');
-});
-Route::get('/auth', function () {
-    return view('auth');
+    return view('index');
 });

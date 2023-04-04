@@ -28,12 +28,14 @@
 </template>
 
 <script>
+import router from "../router";
+
 export default {
     name: "Issue",
     methods: {
         getRole() {
             if (!localStorage.getItem('user_token')){
-                window.location.href = '/auth';
+                router.push('/auth');
             }
             axios.get('/api/role', {
                 headers: {
@@ -65,7 +67,7 @@ export default {
                 }
             })
                 .then(data => {
-                    window.location.href = '/';
+                    router.push('/');
                 })
         },
         sendComment() {
@@ -76,13 +78,16 @@ export default {
                     'Authorization': `Bearer ${localStorage.getItem('user_token')}`
                 }
             }).then(() => {
-                    window.location.href = '/';
+                router.push('/');
             });
         }
     },
     data(){
         return {
-            issue: {},
+            issue: {
+                lawyer: {},
+                client: {}
+            },
             role: undefined,
             textarea: null,
             comment: null

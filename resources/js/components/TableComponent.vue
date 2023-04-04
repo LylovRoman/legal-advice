@@ -10,7 +10,7 @@
             <tr v-for="issue in issues" :key="issue.id">
                 <td>{{ issue.category }}</td>
                 <td>{{ issue.client.name }}</td>
-                <td><a :href="'/issue/' + issue.id">{{ issue.question }}</a></td>
+                <td><a @click.prevent="issueShow(issue.id)" :href="'/issue/' + issue.id">{{ issue.question }}</a></td>
                 <td>{{ (issue.lawyer != '---') ? issue.lawyer.name : '---' }}</td>
                 <td>{{ issue.status }}</td>
                 <td>{{ issue.created_at | date }}</td>
@@ -18,7 +18,7 @@
             </tbody>
         </table>
         <div v-if="role != 'lawyer'">
-            <input @click="onlyMyShow" v-model="onlyMy" type="checkbox"> Показывать только мои заявки
+            <input @click="onlyMyShow" type="checkbox"> Показывать только мои заявки
             <div style="display: flex; flex-direction: column;">
                 <textarea v-model="question" class="w-25" style="min-height: 200px"></textarea>
                 <input type="file" @change="uploadImage">
@@ -52,9 +52,19 @@
 </template>
 
 <script>
+import router from "../router";
+
 export default {
     name: "Table",
     methods: {
+        issueShow(id) {
+            router.push({
+                name: 'issue',
+                params: {
+                    id: id
+                }
+            });
+        },
         sendQuestion() {
             const form = new FormData();
             form.set('category', this.category);
@@ -66,7 +76,7 @@ export default {
                     'Content-Type': 'form/data',
                 }
             }).then(response => {
-                window.location.href = '/';
+                router.push('/');
             });
         },
         getIssues() {
@@ -81,7 +91,7 @@ export default {
         },
         getRole() {
             if (!localStorage.getItem('user_token')){
-                window.location.href = '/auth';
+                router.push('/auth');
             }
             axios.get('/api/role', {
                 headers: {
@@ -94,23 +104,23 @@ export default {
         },
         onlyMyShow() {
             if (this.onlyMy) {
-                window.location.href = '/'
+                router.push('/?onlyMy=no')
             } else {
-                window.location.href = '/?onlyMy=yes'
+                router.push('/?onlyMy=yes');
             }
         },
         onlyStatusShow() {
             if (this.status) {
-                window.location.href = '/?status=' + this.status;
+                router.push('/?status=' + this.status);
             } else {
-                window.location.href = '/';
+                router.push('/');
             }
         },
         onlyDateBetween() {
             if (this.from && this.to) {
-                window.location.href = '/?from=' + this.from + '&to=' + this.to;
+                router.push('/?from=' + this.from + '&to=' + this.to);
             } else {
-                window.location.href = '/';
+                router.push('/');
             }
         },
         uploadImage() {

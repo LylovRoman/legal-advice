@@ -9,6 +9,8 @@
     </div>
 </template>
 <script>
+import router from "../router";
+
 export default {
     name: "Auth",
     methods: {
@@ -19,7 +21,7 @@ export default {
             })
                 .then(data => {
                     localStorage.setItem('user_token', data.data.data.user_token);
-                    window.location.href = '/';
+                    router.push('/');
                 })
         }
     },
