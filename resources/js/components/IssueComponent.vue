@@ -20,7 +20,7 @@
             <textarea v-model="textarea" class="w-25" style="min-height: 200px"></textarea>
             <input type="submit" @click.prevent="sendResponse" class="w-25">
         </div>
-        <div v-if="(issue.status == 'in progress') && (role == 'client')" style="display: flex; flex-direction: column;">
+        <div v-if="((issue.status == 'in progress') && (role == 'client')) && (id == 'client_id')" style="display: flex; flex-direction: column;">
             <textarea v-model="comment" class="w-25" style="min-height: 200px"></textarea>
             <input type="submit" @click.prevent="sendComment" class="w-25" value="Проблема решена">
         </div>
@@ -43,6 +43,7 @@ export default {
                 }
             })
                 .then(data => {
+                    this.id = data.data.data.id;
                     this.role = data.data.data.role;
                 })
         },
@@ -57,16 +58,13 @@ export default {
                 })
         },
         sendResponse() {
-            axios('/api/issue/response/' + document.location.pathname.split('/')[2], {
-                method: 'PATCH',
+            axios.patch('/api/issue/response/' + document.location.pathname.split('/')[2], {
+                response: this.textarea
+            }, {
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('user_token')
-                },
-                data: {
-                    response: this.textarea
                 }
-            })
-                .then(data => {
+            }).then(data => {
                     router.push('/');
                 })
         },
@@ -89,6 +87,7 @@ export default {
                 client: {}
             },
             role: undefined,
+            id: undefined,
             textarea: null,
             comment: null
         }

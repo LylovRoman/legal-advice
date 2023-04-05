@@ -42,6 +42,7 @@ class AuthController extends Controller
     {
         return response()->json([
             "data" => [
+                "id" => Auth::user()->id,
                 "role" => Auth::user()->role
             ]
         ]);
