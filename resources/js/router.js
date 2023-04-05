@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from "vue-router";
-import TableComponent from "./components/TableComponent";
-import AuthComponent from "./components/AuthComponent";
-import IssueComponent from "./components/IssueComponent";
+import TableComponent from "./components/TableComponent.vue";
+import AuthComponent from "./components/AuthComponent.vue";
+import IssueComponent from "./components/IssueComponent.vue";
 
 Vue.use(VueRouter);
 

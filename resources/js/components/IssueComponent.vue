@@ -14,13 +14,13 @@
         <div v-if="issue.status == 'completed'">
             <h2>{{ issue.comment }}</h2>
             <p>Клиент: {{issue.client.name}}</p>
-            <p>Дата: {{issue.updated_at}}</p>
+            <p>Дата: {{issue.updated_at | date}}</p>
         </div>
         <div v-if="(issue.status == 'new') && (role == 'lawyer')" style="display: flex; flex-direction: column;">
             <textarea v-model="textarea" class="w-25" style="min-height: 200px"></textarea>
             <input type="submit" @click.prevent="sendResponse" class="w-25">
         </div>
-        <div v-if="((issue.status == 'in progress') && (role == 'client')) && (id == 'client_id')" style="display: flex; flex-direction: column;">
+        <div v-if="(issue.status == 'in progress') && (role == 'client') && (id == 'client_id')" style="display: flex; flex-direction: column;">
             <textarea v-model="comment" class="w-25" style="min-height: 200px"></textarea>
             <input type="submit" @click.prevent="sendComment" class="w-25" value="Проблема решена">
         </div>
@@ -48,7 +48,7 @@ export default {
                 })
         },
         getIssue() {
-            axios.get('/api/issue/' + document.location.pathname.split('/')[2], {
+            axios.get(`/api/issue/${this.$route.params.id}`, {
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('user_token')
                 }
@@ -58,7 +58,7 @@ export default {
                 })
         },
         sendResponse() {
-            axios.patch('/api/issue/response/' + document.location.pathname.split('/')[2], {
+            axios.patch(`/api/issue/response/${this.$route.params.id}`, {
                 response: this.textarea
             }, {
                 headers: {
@@ -69,7 +69,7 @@ export default {
                 })
         },
         sendComment() {
-            axios.patch(`/api/issue/comment/${document.location.pathname.split('/')[2]}`, {
+            axios.patch(`/api/issue/comment/${this.$route.params.id}`, {
                 comment: this.comment
             }, {
                 headers: {
@@ -95,7 +95,13 @@ export default {
     mounted() {
         this.getRole();
         this.getIssue();
-    }
+    },
+    filters: {
+        date: function (value) {
+            value = value.toString()
+            return value.substr(0, 10);
+        }
+    },
 };
 </script>
 

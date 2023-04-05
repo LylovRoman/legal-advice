@@ -7,7 +7,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="issue in issues" :key="issue.id">
+            <tr v-for="issue in issues" v-if="
+            ((role === 'client') && (!onlyMy || (issue.client.id == id))) ||
+            ((role === 'lawyer') && (!status || (status === issue.status)) && ((!from && !to) || ((!from) || (from < issue.created_at)) && ((!to) || (to > issue.created_at))))" :key="issue.id">
                 <td>{{ issue.category }}</td>
                 <td>{{ issue.client.name }}</td>
                 <td><a @click.prevent="issueShow(issue.id)" :href="'/issue/' + issue.id">{{ issue.question }}</a></td>
@@ -18,7 +20,7 @@
             </tbody>
         </table>
         <div v-if="role != 'lawyer'">
-            <input @click="onlyMyShow" type="checkbox"> Показывать только мои заявки
+            <input v-model="onlyMy" type="checkbox"> Показывать только мои заявки
             <div style="display: flex; flex-direction: column;">
                 <textarea v-model="question" class="w-25" style="min-height: 200px"></textarea>
                 <input type="file" @change="uploadImage">
@@ -34,7 +36,7 @@
         <div v-if="role == 'lawyer'" style="display: flex" class="gap-5">
             <div>
                 <h4>Фильтровать по статусу</h4>
-                <select v-model="status" @change="onlyStatusShow">
+                <select v-model="status">
                     <option value="">Сбросить</option>
                     <option value="new">Новые</option>
                     <option value="in progress">В работе</option>
@@ -45,7 +47,6 @@
                 <h4>Фильтровать по дате</h4>
                 <input v-model="from" type="date">
                 <input v-model="to" type="date">
-                <input @click.prevent="onlyDateBetween" type="submit">
             </div>
         </div>
     </div>
@@ -100,28 +101,8 @@ export default {
             })
                 .then(data => {
                     this.role = data.data.data.role;
+                    this.id = data.data.data.id;
                 })
-        },
-        onlyMyShow() {
-            if (this.onlyMy) {
-                router.push('/?onlyMy=no')
-            } else {
-                router.push('/?onlyMy=yes');
-            }
-        },
-        onlyStatusShow() {
-            if (this.status) {
-                router.push('/?status=' + this.status);
-            } else {
-                router.push('/');
-            }
-        },
-        onlyDateBetween() {
-            if (this.from && this.to) {
-                router.push('/?from=' + this.from + '&to=' + this.to);
-            } else {
-                router.push('/');
-            }
         },
         uploadImage() {
             this.image = event.target.files[0];
@@ -131,12 +112,6 @@ export default {
         date: function (value) {
             value = value.toString()
             return value.substr(0, 10);
-        }
-    },
-    computed: {
-        onlyMy()
-        {
-            return location.search.split('onlyMy?=yes')[0] == '?onlyMy=yes';
         }
     },
     data(){
@@ -156,7 +131,9 @@ export default {
             to: null,
             question: null,
             image: null,
-            category: null
+            category: null,
+            onlyMy: false,
+            id: undefined
         }
     },
     mounted() {

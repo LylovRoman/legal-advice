@@ -23,6 +23,16 @@ export default {
                     localStorage.setItem('user_token', data.data.data.user_token);
                     router.push('/');
                 })
+        },
+        logout() {
+            axios.post('/api/logout', {}, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('user_token')
+                }
+            })
+                .then(data => {
+                    localStorage.removeItem('user_token');
+                })
         }
     },
     data(){
@@ -30,6 +40,9 @@ export default {
             email: null,
             password: undefined
         }
+    },
+    mounted() {
+        this.logout();
     }
 };
 </script>

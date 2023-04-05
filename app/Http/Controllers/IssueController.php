@@ -111,18 +111,16 @@ class IssueController extends Controller
             $issues = Issue::query()
                 ->where('client_id', Auth::id())
                 ->get();
-            if (!isset($_GET['onlyMy'])) {
-                $otherIssues = Issue::query()
-                    ->where('client_id', '!=', Auth::id())
-                    ->get()
-                    ->shuffle();
-                $clientsBeen = [];
-                foreach ($otherIssues as $issue) {
-                    if (!in_array($issue->client_id, $clientsBeen)) {
-                        $issues->push($issue);
-                    }
-                    $clientsBeen[] = $issue->client_id;
+            $otherIssues = Issue::query()
+                ->where('client_id', '!=', Auth::id())
+                ->get()
+                ->shuffle();
+            $clientsBeen = [];
+            foreach ($otherIssues as $issue) {
+                if (!in_array($issue->client_id, $clientsBeen)) {
+                    $issues->push($issue);
                 }
+                $clientsBeen[] = $issue->client_id;
             }
             foreach ($issues as $key => $issue) {
                 $issue->client = $issue->client;
